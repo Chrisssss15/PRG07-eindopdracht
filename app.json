@@ -24,6 +24,15 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Deze app heeft toegang nodig tot je locatie om functies te laten werken.",
+          "locationWhenInUsePermission": "Deze app gebruikt je locatie alleen tijdens gebruik."
+        }
+      ]
+    ]
   }
 }
