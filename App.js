@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 
 import ListScreen from './screens/list';
-import StationDetailScreen from './screens/stationDetail';
+import ListDetailScreen from './screens/listDetail';
 import MapScreen from './screens/map';
 import SettingScreen from './screens/setting';
 import { DataProvider } from './components/data';
@@ -16,7 +16,7 @@ function ListStack() {
     return (
         <Stack.Navigator>
             <Stack.Screen name="List" component={ListScreen} options={{ title: 'List' }} />
-            <Stack.Screen name="Station" component={StationDetailScreen} options={{ title: 'Details' }} />
+            <Stack.Screen name="ListDetail" component={ListDetailScreen} options={{ title: 'Details' }} />
         </Stack.Navigator>
     );
 }
