@@ -1,84 +1,95 @@
-// import { StatusBar } from 'expo-status-bar';
-// import { StyleSheet, Text, View } from 'react-native';
-// import MapView from 'react-native-maps';
-//
-// export default function Map() {
-//     return (
-//         <View style={styles.container}>
-//             <MapView style={styles.map} />
-//             <Text>Open up App.js to start working on your poep!</Text>
-//             <Text>This is the map page</Text>
-//             <StatusBar style="auto" />
-//         </View>
-//     );
-// }
-//
-// const styles = StyleSheet.create({
-//     container: {
-//         flex: 1,
-//         backgroundColor: '#fff',
-//         alignItems: 'center',
-//         justifyContent: 'center',
-//     },
-//     map: {
-//         width: '100%',
-//         height: '100%',
-//     },
-// });
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { StyleSheet, Text, View, ActivityIndicator, Alert } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { StatusBar } from 'expo-status-bar';
+import { waterStationsData } from '../components/data';
 
 export default function Map() {
-    const [location, setLocation] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [locations, setLocations] = useState([]);
+    const [errorMsg, setErrorMsg] = useState(null);
+    const [trackingReady, setTrackingReady] = useState(false);
+    const stations = useContext(waterStationsData);
 
     useEffect(() => {
         (async () => {
             let { status } = await Location.requestForegroundPermissionsAsync();
             if (status !== 'granted') {
-                Alert.alert('Toestemming geweigerd', 'Locatiepermissie is nodig om deze functie te gebruiken.');
-                setLoading(false);
+                Alert.alert('Toestemming geweigerd', 'locatie toestemming geven is nodig om deze functie te gebruiken.');
+                setErrorMsg('Geen toestemming!');
                 return;
             }
 
-            let loc = await Location.getCurrentPositionAsync({});
-            setLocation(loc.coords);
-            setLoading(false);
+            await Location.watchPositionAsync(
+                {
+                    accuracy: Location.Accuracy.High,
+                    distanceInterval: 1,
+                    timeInterval: 1000,
+                },
+                (newLocation) => {
+                    setLocations((prev) => [...prev, newLocation]);
+                    setTrackingReady(true);
+                }
+            );
         })();
     }, []);
 
-    if (loading) {
+    if (!trackingReady && !errorMsg) {
         return (
             <View style={styles.center}>
                 <ActivityIndicator size="large" color="#008484" />
-                <Text>Locatie ophalen...</Text>
+                <Text>Locatie aan het volgen...</Text>
             </View>
         );
     }
 
     return (
         <View style={styles.container}>
-            <MapView
-                style={styles.map}
-                region={{
-                    latitude: location.latitude,
-                    longitude: location.longitude,
-                    latitudeDelta: 0.01,
-                    longitudeDelta: 0.01,
-                }}
-            >
-                <Marker
-                    coordinate={{
-                        latitude: location.latitude,
-                        longitude: location.longitude,
+            {locations.length > 0 ? (
+                <MapView
+                    style={styles.map}
+                    region={{
+                        latitude: locations[locations.length - 1].coords.latitude,
+                        longitude: locations[locations.length - 1].coords.longitude,
+                        latitudeDelta: 0.01,
+                        longitudeDelta: 0.01,
                     }}
-                    title="Je bent hier"
-                />
-            </MapView>
+                    showsUserLocation={true}
+                >
+                    {/* Huidige & vorige locaties */}
+                    {locations.map((loc, index) => (
+                        <Marker
+                            key={index}
+                            coordinate={{
+                                latitude: loc.coords.latitude,
+                                longitude: loc.coords.longitude,
+                            }}
+                            title={`Locatie ${index + 1}`}
+                            description="Hier ben je geweest"
+                        />
+                    ))}
+
+                    {/* Tappunten markers */}
+                    {stations.map((station, index) => {
+                        if (station.latitude && station.longitude) {
+                            return (
+                                <Marker
+                                    key={`station-${index}`}
+                                    coordinate={{
+                                        latitude: parseFloat(station.latitude),
+                                        longitude: parseFloat(station.longitude),
+                                    }}
+                                    title={station.name || 'Onbekend tappunt'}
+                                    description={`${station.street || ''}, ${station.city || ''}`}
+                                />
+                            );
+                        }
+                        return null;
+                    })}
+                </MapView>
+            ) : (
+                <Text style={styles.center}>Wachten op eerste locatie...</Text>
+            )}
             <StatusBar style="auto" />
         </View>
     );
@@ -98,3 +109,4 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
 });
+
