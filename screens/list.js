@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, FlatList, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, FlatList, ActivityIndicator, Pressable } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { waterStationsData } from '../components/data';
 import * as Location from 'expo-location';
 
@@ -13,13 +14,12 @@ function getAfstandInKm(lat1, lon1, lat2, lon2) {
     return afstand;
 }
 
-// de lijst van tappunten wordt toont
 export default function List() {
-    const stations = useContext(waterStationsData); // haal alle tappunten op uit context
-    const [sortedStations, setSortedStations] = useState([]); // stations gesorteerd op afstand
-    const [loading, setLoading] = useState(true); // laadstatus
+    const stations = useContext(waterStationsData); // tappunten ophalen
+    const [sortedStations, setSortedStations] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const navigation = useNavigation(); // nodig voor navigeren
 
-    // 📝 useEffect haalt locatie op & sorteert tappunten op afstand
     useEffect(() => {
         (async () => {
             let { status } = await Location.requestForegroundPermissionsAsync();
@@ -31,12 +31,12 @@ export default function List() {
                 return;
             }
 
-            // 🧭 Huidige locatie gebruiker ophalen
+            //Huidige locatie ophalen
             let loc = await Location.getCurrentPositionAsync({});
             const userLat = loc.coords.latitude;
             const userLon = loc.coords.longitude;
 
-            // 🧮 Voeg afstand toe aan elk tappunt
+            //Voeg afstand toe aan elk tappunt
             const withDistance = stations.map(station => {
                 if (station.latitude && station.longitude) {
                     const dist = getAfstandInKm(
@@ -51,7 +51,7 @@ export default function List() {
                 }
             });
 
-            // 📊 Sorteer tappunten op afstand
+            //Sorteer tappunten op afstand
             const sorted = withDistance.sort((a, b) => a.distance - b.distance);
             setSortedStations(sorted);
             setLoading(false);
@@ -76,7 +76,20 @@ export default function List() {
                 data={sortedStations}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({ item }) => (
-                    <View style={styles.item}>
+                    <Pressable
+                        onPress={() =>
+                            navigation.navigate('ListDetail', {
+                                name: item.name,
+                                latitude: item.latitude,
+                                longitude: item.longitude,
+                            })
+                        }
+                        style={({ pressed }) => [
+                            styles.item,
+                            pressed && { backgroundColor: '#f0f0f0' } // lichte grijze achtergrond bij indrukken
+                        ]}
+                    >
+
                         <Text style={styles.name}>{item.name || 'Naam onbekend'}</Text>
                         <Text style={styles.sub}>
                             {item.city || 'Plaats onbekend'} - {item.street || 'Straat onbekend'}
@@ -86,14 +99,13 @@ export default function List() {
                                 {item.distance.toFixed(2)} km
                             </Text>
                         )}
-                    </View>
+                    </Pressable>
                 )}
             />
             <StatusBar style="auto" />
         </View>
     );
 }
-
 
 const styles = StyleSheet.create({
     container: {
