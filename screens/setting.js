@@ -6,7 +6,7 @@ import { ThemeContext } from '../components/themeContext';
 
 
 export default function Setting() {
-    const { darkMode, toggleDarkMode } = useContext(ThemeContext);
+    const { darkMode, toggleDarkMode } = useContext(ThemeContext); // check of dark mode aanstaat
 
     const containerStyle = [
         styles.container,
@@ -20,7 +20,9 @@ export default function Setting() {
         <ScrollView contentContainerStyle={containerStyle}>
             <Text style={[styles.title, textStyle]}>Over deze app</Text>
             <Text style={[styles.paragraph, textStyle]}>
-                tekst over de app, wat het doet en waarom het is gemaakt.
+                Deze app helpt je om snel watertappunten in jouw omgeving te vinden.
+                Je ziet direct welke tappunten het dichtstbij zijn, kunt locaties bekijken op een kaart, en zelfs je eigen foto's toevoegen per locatie.
+                Ideaal voor onderweg, duurzaam drinken en het verminderen van plastic gebruik.
             </Text>
 
             <View style={styles.switchRow}>
