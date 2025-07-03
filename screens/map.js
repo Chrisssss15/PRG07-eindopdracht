@@ -165,6 +165,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 10,
         paddingHorizontal: 20,
+        position: 'relative',
+        height: 120,
+    },
+    cancelButton: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
     },
     arrow: {
         width: 80,
