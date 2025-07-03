@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { View, Text, StyleSheet, Dimensions, Image, Button, Alert } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as ImagePicker from 'expo-image-picker';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // install AsyncStorage
 import * as Location from 'expo-location';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useNavigation } from '@react-navigation/native';
@@ -15,16 +15,16 @@ export default function ListDetail({ route }) {
     const lon = parseFloat(longitude);
     const [imageUri, setImageUri] = useState(null);
     const [adres, setAdres] = useState(null);
-    const key = `image:${name}`;
+    const key = `image:${name}`; //
     const navigation = useNavigation();
     const { darkMode } = useContext(ThemeContext);  // dark mode context
 
     // Ophalen afbeelding én adres
-    useEffect(() => {
-        (async () => {
-            const savedUri = await AsyncStorage.getItem(key);
+    useEffect(() => { // gebruik useEffect om de afbeelding en adres op te halen
+        (async () => { // afbeelding ophalen?
+            const savedUri = await AsyncStorage.getItem(key); // ophalen afbeelding
             if (savedUri) {
-                setImageUri(savedUri);
+                setImageUri(savedUri); // als er een afbeelding is, deze laten tonen
             }
 
             //Coördinaten omzetten naar adres
@@ -51,37 +51,37 @@ export default function ListDetail({ route }) {
 
     // Foto Uploaden
     const pickImage = async () => {
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        let result = await ImagePicker.launchImageLibraryAsync({ // Kies de afbeelding uit je galerij
+            mediaTypes: ImagePicker.MediaTypeOptions.Images, // alleen afbeeldingen
             allowsEditing: true,
             aspect: [4, 3],
             quality: 1,
         });
 
-        if (!result.canceled) {
-            const uri = result.assets[0].uri;
-            setImageUri(uri);
-            await AsyncStorage.setItem(key, uri);
+        if (!result.canceled) { // controleert of de gebruiker niet heeft geannuleerd
+            const uri = result.assets[0].uri; // URI van de gekozen afbeelding
+            setImageUri(uri);   // afbeelding laten tonen
+            await AsyncStorage.setItem(key, uri); // afbeelding opslaan in AsyncStorage
         }
     };
 
     // Foto verwijderen
     const removeImage = async () => {
-        const isAvailable = await LocalAuthentication.hasHardwareAsync();
-        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+        const isAvailable = await LocalAuthentication.hasHardwareAsync(); // controleer of authenticatie hardware beschikbaar is
+        const isEnrolled = await LocalAuthentication.isEnrolledAsync(); // controleer of er authenticatie methoden zijn ingesteld
 
-        if (!isAvailable || !isEnrolled) {
+        if (!isAvailable || !isEnrolled) { // als hardware niet beschikbaar is of geen methoden zijn ingesteld
             Alert.alert('Beveiliging niet beschikbaar', 'Authenticatie via Face ID, Touch ID of toegangscode is vereist.');
             return;
         }
 
-        const auth = await LocalAuthentication.authenticateAsync({
+        const auth = await LocalAuthentication.authenticateAsync({ // authenticatie prompt
             promptMessage: 'Verifieer om afbeelding te verwijderen',
             fallbackLabel: 'Gebruik toegangscode',
             cancelLabel: 'Annuleer',
         });
 
-        if (auth.success) {
+        if (auth.success) { // als authenticatie succesvol is
             Alert.alert(
                 'Weet je het zeker?',
                 'Deze afbeelding wordt verwijderd.',
@@ -91,7 +91,7 @@ export default function ListDetail({ route }) {
                         text: 'Verwijder',
                         style: 'destructive',
                         onPress: async () => {
-                            await AsyncStorage.removeItem(key);
+                            await AsyncStorage.removeItem(key); // afbeelding verwijderen
                             setImageUri(null);
                         },
                     },

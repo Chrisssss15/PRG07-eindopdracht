@@ -32,14 +32,14 @@ export default function Map() {
                 return;
             }
 
-            Location.watchPositionAsync(
+            Location.watchPositionAsync( //haalt mijn locatie op
                 {
                     accuracy: Location.Accuracy.High,
                     distanceInterval: 1,
                     timeInterval: 1000,
                 },
                 (newLoc) => {
-                    setLocation(newLoc.coords);
+                    setLocation(newLoc.coords); // huidige locatie opslaan in een state
                 }
             );
 
@@ -90,12 +90,12 @@ export default function Map() {
                 <MapView
                     style={styles.map}
                     initialRegion={{
-                        latitude: location.latitude,
+                        latitude: location.latitude, // huidige locatie van de gebruiker
                         longitude: location.longitude,
                         latitudeDelta: 0.01,
                         longitudeDelta: 0.01,
                     }}
-                    showsUserLocation={true}
+                    showsUserLocation={true} // Laat de huidige locatie tonen op de kaart
                 >
                     {stations.map((station, index) => {
                         if (station.latitude && station.longitude) {
@@ -107,7 +107,7 @@ export default function Map() {
                                         longitude: parseFloat(station.longitude),
                                     }}
                                     title={station.name || 'Onbekend tappunt'}
-                                    description={`${station.street || ''}, ${station.city || ''}`}
+                                    // description={`${station.street || ''}, ${station.city || ''}`}
                                 />
                             );
                         }
